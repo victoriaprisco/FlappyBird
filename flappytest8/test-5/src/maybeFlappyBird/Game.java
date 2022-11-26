@@ -4,30 +4,19 @@ import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.util.LinkedList;
 
-import edu.princeton.cs.introcs.*;
-
-
-/*
- * methods:
- * 	- draw initial
- * - wait for key input
- * - jump
- * - move game
- *  - is alive
- */
 
 
 public class Game {
-	private static final double RADIUS = 0.01;
-	private static final double REASONABLE_DISTANCE = 0.4;
-	private static Color birdColor = new Color((int) (Math.random() * 255),(int) (Math.random() * 255), (int) (Math.random() * 255));
-	private static LinkedList<Obstacles> obs = new LinkedList<Obstacles>();
-	private static double xBird = 0.2;
-	private static double yBird = 0.5;
-	private static final int SPACE = KeyEvent.VK_SPACE;
+	private final double RADIUS = 0.02;
+	private final double REASONABLE_DISTANCE = 0.4;
+	private Color birdColor = new Color((int) (Math.random() * 255), (int) (Math.random() * 255), (int) (Math.random() * 255));
+	public LinkedList<Obstacle> obs = new LinkedList<Obstacle>();
+	double xBird = 0.2;
+	double yBird = 0.5;
+	private final int SPACE = KeyEvent.VK_SPACE;
 
 	//	returns the x coordinate of the previous obstacle in the list
-	public static double getLastXCoord(LinkedList<Obstacles> a, int count) {
+	public double getLastXCoord(LinkedList<Obstacle> a, int count) {
 		if(count == 0) {
 			return 0.3;
 		}
@@ -35,8 +24,7 @@ public class Game {
 	}
 
 	// creates amt of obstacles in the obs list
-	public static LinkedList<Obstacles> createObstacles(int amt) {
-		System.out.println(obs.size());
+	public LinkedList<Obstacle> createObstacles(int amt) {
 		int count = obs.size();
 		while(count < amt) {
 			double xCoordLast = getLastXCoord(obs, count);
@@ -52,30 +40,29 @@ public class Game {
 			while (gapWidth > 0.15) {
 				gapWidth = Math.random() + 0.09;
 			}
-			Obstacles temp = new Obstacles(xCoord, gapHeight, gapWidth);
+			Obstacle temp = new Obstacle(xCoord, gapHeight, gapWidth);
 			obs.addLast(temp);
 			count++;
 		}
 		return obs;
 	}
-	public static void offScreen() {
+	public void offScreen() {
 		if(obs.get(obs.size()-1).getXCoord() < REASONABLE_DISTANCE) {
-			Obstacles temp = obs.get(obs.size()-1);
+			Obstacle temp = obs.get(obs.size()-1);
 			obs.clear();
 			obs.addFirst(temp);
 			createObstacles(3);
 		}
 	}
 
-	public static void drawInitial() {
+	public void drawInitial() {
 		createObstacles(5);
 		draw();
 	}
 
-	public static void draw() {
+	public void draw() {
 		StdDraw.clear(StdDraw.BOOK_LIGHT_BLUE);
-		
-		for(Obstacles o : obs) {
+		for(Obstacle o : obs) {
 			o.draw();
 		}
 		StdDraw.setPenColor(birdColor);
@@ -83,26 +70,26 @@ public class Game {
 		StdDraw.show();
 	}
 
-	public static void moveGame(double deltaTime) {
-		for(Obstacles o : obs) {
-			o.moveXCoord(deltaTime * 0.07);
+	public void moveGame(double deltaTime) {
+		for(Obstacle o : obs) {
+			o.moveXCoord(deltaTime * 0.05);
 		}
 		offScreen();
 		draw();
 	}
 
-	public static boolean waitKeyInput() {
+	public boolean waitKeyInput() {
 		return StdDraw.isKeyPressed(SPACE);
 	}
-	public static void moveBird(boolean pressed) {
-		yBird  = pressed ? yBird + 0.004 : yBird - 0.007;
+	public void moveBird(boolean pressed) {
+		yBird  = pressed ? yBird + 0.005 : yBird - 0.007;
 	}
 	
-	public static boolean gameAlive() {
+	public boolean gameAlive() {
 		if(yBird >= 1 || yBird <= 0) {
 			return false;
 		}
-		for(Obstacles o : obs) {
+		for(Obstacle o : obs) {
 			double[] yCoords = o.getYCoords();
 			double bottomLimit = yCoords[0];
 			double topLimit = yCoords[1];
@@ -114,14 +101,14 @@ public class Game {
 		return true;
 	}
 	
-	public static void flapTheBird() {
+	public void flapTheBird() {
 		StdDraw.enableDoubleBuffering();
 		drawInitial();
 		boolean pressed = false;
 		int frameCount = 0;
 		int frameUp = -2;
 		while(gameAlive()) {
-			moveGame(0.07);
+			moveGame(0.04);
 			if(waitKeyInput() && !pressed) {
 				pressed = true;
 				frameUp = frameCount;
@@ -137,14 +124,15 @@ public class Game {
 			moveBird(pressed);
 			draw();
 			frameCount++;
-		}
+		} 
 		StdDraw.setPenColor();
 		StdDraw.text(0.5, 0.5,  "game over you suck :(");
 		StdDraw.show();
 	}
 
 	public static void main(String[] args) {
-		flapTheBird();
-	}
+		Game n = new Game();
+		n.flapTheBird();
+	}  
 		
 }
