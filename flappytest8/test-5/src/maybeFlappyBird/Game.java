@@ -126,7 +126,7 @@ public class Game {
 			frameCount++;
 		} 
 		StdDraw.setPenColor();
-		StdDraw.text(0.5, 0.5,  "game over you suck :(");
+		StdDraw.text(0.5, 0.5,  "game over :(");
 		StdDraw.show();
 	}
 
