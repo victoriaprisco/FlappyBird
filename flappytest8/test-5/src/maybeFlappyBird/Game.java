@@ -4,21 +4,29 @@ import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.util.LinkedList;
 
+import support.cse131.Timing;
+
 
 
 public class Game {
 	private final double RADIUS = 0.02;
 	private final double REASONABLE_DISTANCE = 0.4;
+	private final double START_X = 0.3;
+	private final double GAP_HEIGHT_LOWER_BOUND = 0.1;
+	private final double GAP_WIDTH_LOWER_BOUND = 0.09;
+	private final double GAP_HEIGHT_UPPER_BOUND = 0.9;
+	private final double GAP_WIDTH_UPPER_BOUND = 0.15;
+	private double speed = 0.3;
 	private Color birdColor = new Color((int) (Math.random() * 255), (int) (Math.random() * 255), (int) (Math.random() * 255));
 	public LinkedList<Obstacle> obs = new LinkedList<Obstacle>();
 	double xBird = 0.2;
 	double yBird = 0.5;
 	private final int SPACE = KeyEvent.VK_SPACE;
-
+   
 	//	returns the x coordinate of the previous obstacle in the list
 	public double getLastXCoord(LinkedList<Obstacle> a, int count) {
 		if(count == 0) {
-			return 0.3;
+			return START_X;
 		}
 		return a.get(count - 1).getXCoord();
 	}
@@ -32,13 +40,13 @@ public class Game {
 			while(xCoord - xCoordLast < REASONABLE_DISTANCE) {
 				xCoord += Math.random() / 2;
 			}
-			double gapHeight = Math.random() + 0.1;
-			double gapWidth = Math.random() + 0.09;
-			while(gapHeight > 0.9) {
-				gapHeight = Math.random() + 0.1;
+			double gapHeight = Math.random() + GAP_HEIGHT_LOWER_BOUND;
+			double gapWidth = Math.random() + GAP_WIDTH_LOWER_BOUND;
+			while(gapHeight > GAP_HEIGHT_UPPER_BOUND) {
+				gapHeight = Math.random() + GAP_HEIGHT_LOWER_BOUND;
 			}
-			while (gapWidth > 0.15) {
-				gapWidth = Math.random() + 0.09;
+			while (gapWidth > GAP_WIDTH_UPPER_BOUND) {
+				gapWidth = Math.random() + GAP_WIDTH_LOWER_BOUND;
 			}
 			Obstacle temp = new Obstacle(xCoord, gapHeight, gapWidth);
 			obs.addLast(temp);
@@ -46,6 +54,7 @@ public class Game {
 		}
 		return obs;
 	}
+	
 	public void offScreen() {
 		if(obs.get(obs.size()-1).getXCoord() < REASONABLE_DISTANCE) {
 			Obstacle temp = obs.get(obs.size()-1);
@@ -72,7 +81,7 @@ public class Game {
 
 	public void moveGame(double deltaTime) {
 		for(Obstacle o : obs) {
-			o.moveXCoord(deltaTime * 0.05);
+			o.moveXCoord(deltaTime * speed);
 		}
 		offScreen();
 		draw();
@@ -94,7 +103,7 @@ public class Game {
 			double bottomLimit = yCoords[0];
 			double topLimit = yCoords[1];
 			double xCoord = o.getXCoord();
-			if((Math.abs(xBird - xCoord) <= o.getWidth()) && (yBird < bottomLimit || yBird >= topLimit)) {
+			if((Math.abs(xBird + RADIUS - xCoord) <= o.getWidth()) && (yBird + RADIUS < bottomLimit || yBird + RADIUS >= topLimit)) {
 				return false;
 			}
 		}
@@ -102,13 +111,16 @@ public class Game {
 	}
 	
 	public void flapTheBird() {
+		double prevTime = Timing.getCurrentTimeInSeconds();
 		StdDraw.enableDoubleBuffering();
 		drawInitial();
 		boolean pressed = false;
 		int frameCount = 0;
 		int frameUp = -2;
 		while(gameAlive()) {
-			moveGame(0.04);
+			double currTime = Timing.getCurrentTimeInSeconds();
+			double deltaTime = currTime - prevTime;
+			moveGame(deltaTime);
 			if(waitKeyInput() && !pressed) {
 				pressed = true;
 				frameUp = frameCount;
@@ -124,6 +136,7 @@ public class Game {
 			moveBird(pressed);
 			draw();
 			frameCount++;
+			prevTime = currTime;
 		} 
 		StdDraw.setPenColor();
 		StdDraw.text(0.5, 0.5,  "game over :(");
