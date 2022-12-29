@@ -3,9 +3,8 @@ package maybeFlappyBird;
 import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.awt.Font;
-
-public class GapDebugApp {
-	private final static double RADIUS = 0.01;
+  public class GapDebugApp { 
+	private final static double RADIUS = 0.02;
 	private static Color birdColor = StdDraw.BLACK;
 	private static double x = 0.2;
 	private static double y = 0.5;
